@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마비노기 모바일 룬 최종 분석 대시보드</title>
+    <title>마비노기 모바일 룬 브라우저</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: A dashboard-style SPA featuring a comprehensive control panel with multiple filters (search, grade, type, rank) for deep data exploration. The top provides a quick statistical overview and two summary charts. The core of the application is a filterable, responsive grid of rune cards, each detailing the rune's stats, official description, and a nuanced expert analysis. This structure allows users to seamlessly switch between a high-level overview and granular, specific information, providing a powerful and intuitive tool for strategic decision-making. -->
+    <!-- Application Structure Plan: A focused 'Rune Browser' SPA. The dashboard and chart elements have been removed to prioritize content clarity. The primary interface consists of a powerful multi-filter control panel at the top and a main content area displaying a responsive grid of redesigned rune cards. This minimalist structure eliminates distractions and centers the user experience entirely on finding, reading, and comparing detailed rune information, which directly addresses the user's request for improved readability and focus. -->
     <!-- Visualization & Content Choices: 
-    - Rune List -> Goal: Explore/Compare/Filter -> Presentation: Interactive Card Grid -> Interaction: Multi-faceted filtering (text, grade, type, rank), Sorting -> Justification: Provides maximum user control for exploring a large dataset, allowing for complex queries and comparisons. Method: HTML/JS.
-    - Grade/Rank Data -> Goal: Show Proportions & Counts -> Presentation: Donut & Bar Charts -> Interaction: Hover Tooltips, Dynamic Updates -> Justification: Offers immediate visual feedback on the dataset's composition as filters are applied. Library: Chart.js.
-    - Rune Details -> Goal: Inform/Analyze -> Presentation: Structured text within cards (Type, Grade, Rank, Description, Analysis) -> Interaction: Scrollable description area -> Justification: Presents a rich amount of information in a compact, organized, and easily digestible format. Method: HTML.
+    - Rune List -> Goal: Explore/Compare/Filter -> Presentation: Redesigned Interactive Card Grid -> Interaction: Multi-faceted filtering (text, grade, type, rank) -> Justification: The new two-column card layout significantly improves readability by removing cramped, scrollable text boxes and providing clear separation between core stats and detailed descriptions. This is the optimal way to present dense textual information for comparison. Method: HTML/JS.
+    - Charts/Stats -> Goal: N/A -> Presentation: Removed -> Interaction: N/A -> Justification: All dashboard and chart elements were removed as per the user's request to streamline the interface and focus solely on the rune data itself.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -23,24 +21,6 @@
             background-color: #FDFBF8;
             color: #4A4A4A;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 320px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 320px;
-            }
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
         .rank-SSS { background: linear-gradient(135deg, #fde047, #f59e0b); color: #422006; border: 2px solid #ca8a04; } /* Gold Gradient */
         .rank-SS { background: linear-gradient(135deg, #d1d5db, #9ca3af); color: #1f2937; border: 2px solid #6b7280; } /* Silver Gradient */
         .rank-S { background-color: #EC4899; color: white; } /* Pink */
@@ -61,15 +41,15 @@
 <body class="antialiased">
     <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-[#3A3A3A]">마비노기 모바일 룬 최종 분석</h1>
-            <p class="mt-2 text-lg text-gray-600">상호작용형 대시보드를 통해 룬의 효과와 등급을 탐색하세요.</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-[#3A3A3A]">마비노기 모바일 룬 브라우저</h1>
+            <p class="mt-2 text-lg text-gray-600">필터를 사용하여 원하는 룬의 효과와 분석을 자세히 확인하세요.</p>
         </header>
 
         <section id="controls" class="mb-8 p-4 bg-white rounded-xl shadow-md sticky top-4 z-10">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
                 <div class="lg:col-span-2">
-                    <label for="search-input" class="block text-sm font-medium text-gray-700">룬 이름 검색</label>
-                    <input type="text" id="search-input" placeholder="예: 닫힌 운명" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
+                    <label for="search-input" class="block text-sm font-medium text-gray-700">룬 이름 또는 분석 내용 검색</label>
+                    <input type="text" id="search-input" placeholder="예: 방어구 파괴" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
                 </div>
                 <div>
                     <label for="grade-filter" class="block text-sm font-medium text-gray-700">등급</label>
@@ -89,47 +69,15 @@
                         <option value="all">전체 랭크</option>
                     </select>
                 </div>
-                <button id="reset-filters" class="w-full bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">초기화</button>
+                <button id="reset-filters" class="w-full bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">필터 초기화</button>
             </div>
         </section>
 
         <main>
-            <section id="dashboard" class="mb-8">
-                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <div id="stat-total" class="p-6 bg-white rounded-xl shadow-md flex flex-col items-center justify-center text-center">
-                         <span class="text-4xl font-bold text-indigo-600" id="total-runes-count">0</span>
-                         <p class="mt-2 text-gray-600 font-medium">필터된 룬</p>
-                     </div>
-                     <div class="p-6 bg-white rounded-xl shadow-md flex flex-col items-center justify-center text-center">
-                         <span class="text-4xl font-bold text-yellow-500" id="sss-tier-runes-count">0</span>
-                         <p class="mt-2 text-gray-600 font-medium">SSS 랭크</p>
-                     </div>
-                      <div class="p-6 bg-white rounded-xl shadow-md flex flex-col items-center justify-center text-center">
-                         <span class="text-4xl font-bold text-pink-500" id="s-tier-runes-count">0</span>
-                         <p class="mt-2 text-gray-600 font-medium">S 랭크 이상</p>
-                     </div>
-                     <div class="p-6 bg-white rounded-xl shadow-md flex flex-col items-center justify-center text-center">
-                         <span class="text-4xl font-bold text-purple-600" id="emblem-runes-count">0</span>
-                         <p class="mt-2 text-gray-600 font-medium">엠블럼 룬</p>
-                     </div>
-                 </div>
-                 <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                     <div class="p-6 bg-white rounded-xl shadow-md">
-                         <h3 class="text-xl font-bold text-center mb-4">등급별 룬 분포</h3>
-                         <div class="chart-container">
-                             <canvas id="grade-chart"></canvas>
-                         </div>
-                     </div>
-                     <div class="p-6 bg-white rounded-xl shadow-md">
-                         <h3 class="text-xl font-bold text-center mb-4">랭크별 룬 개수</h3>
-                         <div class="chart-container">
-                             <canvas id="rank-chart"></canvas>
-                         </div>
-                     </div>
-                 </div>
-            </section>
-
-            <section id="rune-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+             <div class="mb-4 text-right text-gray-500">
+                <p><span id="rune-count" class="font-bold">0</span>개의 룬이 검색되었습니다.</p>
+            </div>
+            <section id="rune-grid" class="space-y-6">
             </section>
         </main>
     </div>
@@ -240,21 +188,13 @@
             const searchInput = document.getElementById('search-input');
             const resetBtn = document.getElementById('reset-filters');
             const runeGrid = document.getElementById('rune-grid');
+            const runeCountSpan = document.getElementById('rune-count');
             
-            let gradeChart, rankChart;
             const rankOrder = ["SSS", "SS", "S", "A", "B", "C", "F"];
 
-            function getRankClass(rank) {
-                return `rank-${rank}`;
-            }
-            
-            function getTypeClass(type) {
-                return `type-${type}`;
-            }
-
-            function getGradeClass(grade) {
-                return `grade-${grade}`;
-            }
+            function getRankClass(rank) { return `rank-${rank}`; }
+            function getTypeClass(type) { return `type-${type}`; }
+            function getGradeClass(grade) { return `grade-${grade}`; }
 
             function setupFilters() {
                 const grades = [...new Set(runeData.map(r => r.grade))];
@@ -285,61 +225,33 @@
 
             function createRuneCard(rune) {
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-xl shadow-lg p-6 flex flex-col transform hover:-translate-y-1 transition-transform duration-300";
+                card.className = "bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-1 transition-transform duration-300";
                 
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <h2 class="text-xl font-bold text-gray-800 pr-2">${rune.name}</h2>
-                        <div class="flex-shrink-0 flex flex-col items-end space-y-2">
-                            <span class="text-xs font-bold py-1 px-3 rounded-full ${getTypeClass(rune.type)}">${rune.type}</span>
-                            <span class="text-xs font-bold border-2 ${getGradeClass(rune.grade)} py-1 px-3 rounded-full">${rune.grade}</span>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 flex flex-col space-y-3">
+                            <h2 class="text-2xl font-bold text-gray-800">${rune.name}</h2>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs font-bold py-1 px-3 rounded-full ${getTypeClass(rune.type)}">${rune.type}</span>
+                                <span class="text-xs font-bold border-2 ${getGradeClass(rune.grade)} py-1 px-3 rounded-full">${rune.grade}</span>
+                            </div>
+                            <div>
+                                <span class="text-xl font-bold py-2 px-5 rounded-full ${getRankClass(rune.rank)}">${rune.rank}</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-4">
-                        <span class="text-lg font-bold py-1 px-4 rounded-full ${getRankClass(rune.rank)}">${rune.rank}</span>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-700 mb-1">효과 설명</h4>
-                        <div class="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-md h-32 overflow-y-auto">${rune.description}</div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-700 mb-1">전문가 분석</h4>
-                        <p class="text-sm text-gray-800">${rune.analysis}</p>
+                        <div class="lg:col-span-2 space-y-4">
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-2 border-b-2 border-gray-200 pb-1">효과 설명</h4>
+                                <p class="text-base text-gray-600">${rune.description}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-2 border-b-2 border-gray-200 pb-1">전문가 분석</h4>
+                                <p class="text-base text-gray-800">${rune.analysis}</p>
+                            </div>
+                        </div>
                     </div>
                 `;
                 return card;
-            }
-
-            function updateCharts(filteredData) {
-                const gradeCounts = filteredData.reduce((acc, rune) => {
-                    acc[rune.grade] = (acc[rune.grade] || 0) + 1;
-                    return acc;
-                }, {});
-
-                const rankCounts = filteredData.reduce((acc, rune) => {
-                    acc[rune.rank] = (acc[rune.rank] || 0) + 1;
-                    return acc;
-                }, {});
-                
-                const sortedRankData = rankOrder.map(rank => rankCounts[rank] || 0);
-
-                if (gradeChart) {
-                    gradeChart.data.labels = Object.keys(gradeCounts);
-                    gradeChart.data.datasets[0].data = Object.values(gradeCounts);
-                    gradeChart.update();
-                }
-
-                if (rankChart) {
-                    rankChart.data.datasets[0].data = sortedRankData;
-                    rankChart.update();
-                }
-            }
-
-            function updateStats(filteredData) {
-                document.getElementById('total-runes-count').textContent = filteredData.length;
-                document.getElementById('sss-tier-runes-count').textContent = filteredData.filter(r => r.rank === 'SSS').length;
-                document.getElementById('s-tier-runes-count').textContent = filteredData.filter(r => r.rank.startsWith('S')).length;
-                 document.getElementById('emblem-runes-count').textContent = filteredData.filter(r => r.type === '엠블럼').length;
             }
 
             function render() {
@@ -352,93 +264,24 @@
                     const gradeMatch = grade === 'all' || rune.grade === grade;
                     const typeMatch = type === 'all' || rune.type === type;
                     const rankMatch = rank === 'all' || rune.rank === rank;
-                    const searchMatch = rune.name.toLowerCase().includes(searchTerm) || rune.analysis.toLowerCase().includes(searchTerm);
+                    const searchMatch = rune.name.toLowerCase().includes(searchTerm) || rune.analysis.toLowerCase().includes(searchTerm) || rune.description.toLowerCase().includes(searchTerm);
                     return gradeMatch && typeMatch && rankMatch && searchMatch;
                 });
                 
-                const sortedData = filteredData.sort((a,b) => rankOrder.indexOf(a.rank) - rankOrder.indexOf(b.rank));
+                const sortedData = filteredData.sort((a,b) => {
+                    const rankComparison = rankOrder.indexOf(a.rank) - rankOrder.indexOf(b.rank);
+                    if (rankComparison !== 0) return rankComparison;
+                    return a.name.localeCompare(b.name);
+                });
 
                 runeGrid.innerHTML = '';
                 sortedData.forEach(rune => {
                     runeGrid.appendChild(createRuneCard(rune));
                 });
-                
-                updateCharts(sortedData);
-                updateStats(sortedData);
+
+                runeCountSpan.textContent = sortedData.length;
             }
             
-            function initCharts() {
-                const gradeCtx = document.getElementById('grade-chart').getContext('2d');
-                gradeChart = new Chart(gradeCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            data: [],
-                            backgroundColor: ['#8B5CF6', '#FBBF24'],
-                            borderColor: '#FDFBF8',
-                            borderWidth: 4,
-                            hoverOffset: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    font: { size: 14, family: "'Noto Sans KR', sans-serif" }
-                                }
-                            }
-                        }
-                    }
-                });
-                
-                const rankCtx = document.getElementById('rank-chart').getContext('2d');
-                rankChart = new Chart(rankCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: rankOrder,
-                        datasets: [{
-                            label: '룬 개수',
-                            data: [],
-                            backgroundColor: [
-                                'rgba(202, 138, 4, 0.7)', 
-                                'rgba(107, 114, 128, 0.7)',
-                                'rgba(236, 72, 153, 0.7)',
-                                'rgba(59, 130, 246, 0.7)',
-                                'rgba(34, 197, 94, 0.7)',
-                                'rgba(249, 115, 22, 0.7)',
-                                'rgba(107, 114, 128, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgba(202, 138, 4, 1)', 
-                                'rgba(107, 114, 128, 1)',
-                                'rgba(236, 72, 153, 1)',
-                                'rgba(59, 130, 246, 1)',
-                                'rgba(34, 197, 94, 1)',
-                                'rgba(249, 115, 22, 1)',
-                                'rgba(107, 114, 128, 1)'
-                            ],
-                            borderWidth: 1,
-                            borderRadius: 5
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                           legend: { display: false }
-                        },
-                        scales: {
-                            x: { beginAtZero: true, grid: { display: true, drawOnChartArea: false } },
-                            y: { grid: { display: false } }
-                        }
-                    }
-                });
-            }
-
             gradeFilter.addEventListener('change', render);
             typeFilter.addEventListener('change', render);
             rankFilter.addEventListener('change', render);
@@ -452,7 +295,6 @@
             });
 
             setupFilters();
-            initCharts();
             render();
         });
     </script>
