@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: The final, corrected 'Rune Browser' SPA. This version restores data integrity by correctly including all user-provided data, including the previously omitted Emblem runes. It also re-introduces the 'Type' filter as requested, allowing for full-spectrum data exploration. The layout remains streamlined and focused on content readability. -->
+    <!-- Application Structure Plan: The final, corrected 'Rune Browser' SPA. This version restores data integrity by correctly including all user-provided data, including the previously omitted Emblem runes and the critical '압도적인 힘' and '섬세한 손놀림' runes. It also re-introduces the 'Type' filter as requested, allowing for full-spectrum data exploration. The layout remains streamlined and focused on content readability. -->
     <!-- Visualization & Content Choices: 
     - Rune List -> Goal: Explore/Compare/Filter -> Presentation: Interactive Card Grid with complete and corrected data -> Interaction: Full filtering capability (text, grade, type, rank) -> Justification: The UI now correctly represents the full dataset. The card layout remains the most effective way to present this dense, text-based information clearly. Method: HTML/JS.
-    - All incorrect/omitted data -> Goal: Correct/Restore -> Presentation: N/A -> Interaction: N/A -> Justification: All data omissions (Emblem runes) and incorrect removals (Type classification) have been rectified to produce a complete and accurate application.
+    - All incorrect/omitted data -> Goal: Correct/Restore -> Presentation: N/A -> Interaction: N/A -> Justification: All data omissions have been rectified to produce a complete and accurate application.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -106,6 +106,8 @@
             { "name": "산맥 군주", "grade": "전설", "type": "엠블럼", "rank": "SSS", "description": "공격 시 50% 확률로 각성하여 20초 동안 강타 피해가 60% 증가한다. 또한 지속 시간 동안 공격 적중 시 (공격력×155%)의 추가 피해를 입히며 이 효과는 3초마다 한 번만 적용된다.(재사용 대기 시간: 90초) 상시 효과: 강타 피해가 8%, 스킬 사용 속도가 8% 증가한다.", "analysis": "검술사에게는 SSS급, 그 외 강타 기반 직업군에게는 S급 성능을 보여주는 최상급 룬. '부서진 하늘'의 강타 버전으로, 각성 시 막강한 한방 데미지를 보장한다." },
             { "name": "아득한 빛", "grade": "전설", "type": "엠블럼", "rank": "SS", "description": "공격 시 50% 확률로 각성하여 20초 동안 치명타 확률이 20%, 치명타 피해량이 50% 증가한다.(재사용 대기 시간: 90초) 상시 효과: 치명타 확률이 5%, 치명타 피해량이 10%, 적에게 주는 피해가 5% 증가한다.", "analysis": "모든 딜러에게 유용한 치명타 관련 옵션을 대폭 상승시켜주는 고성능 범용 룬. 특히 '검무', '불길' 등 치명타 관련 룬과 함께 사용 시 시너지가 극대화된다." },
             { "name": "갈라진 땅", "grade": "전설", "type": "엠블럼", "rank": "SS", "description": "공격 시 50% 확률로 각성하여 35초 동안 추가타 확률이 30% 증가하며, 추가타 적중 시 다음 공격은 선행 타격의 18% 만큼의 피해를 주는 추가 공격이 발생한다.(재사용 대기 시간: 90초) 상시 효과: 추가타 확률이 12% 증가한다.", "analysis": "추가타에 모든 것을 건 룬. 빙결, 전격 등 추가타와 시너지가 좋은 빌드에게는 SS급 성능을 보이며, 그 외 추가타 세팅을 한 직업군에게도 S급의 높은 효율을 제공한다." },
+            { "name": "압도적인 힘", "grade": "전설", "type": "방어구", "rank": "A", "description": "강타 피해가 6%, 공격력이 6%, 치명타 확률이 4% 증가한다. 엠블럼의 각성 효과가 활성화될 때, 20초간 이 룬으로 증가한 능력치가 두배가 된다.", "analysis": "단독 사용 시에는 A급의 무난한 성능을 보여주지만, 8성 엠블럼과 눈 먼 예언자 룬과 조합될 경우 20초간 SSS급으로 변모하는 폭발적인 잠재력을 가졌다. 강타 빌드의 폭딜 타임을 책임지는 핵심 파츠." },
+            { "name": "섬세한 손놀림", "grade": "전설", "type": "방어구", "rank": "A", "description": "연타 피해가 6%, 공격력이 6%, 추가타 확률이 4% 증가한다. 엠블럼의 각성 효과가 활성화될 때, 20초간 이 룬으로 증가한 능력치가 두배가 된다.", "analysis": "'압도적인 힘'의 연타 버전. 단독 성능은 A급이지만, 8성 엠블럼과 눈 먼 예언자 룬과 조합 시 20초간 SSS급 딜링을 보장한다. 연타 위주 직업군이 각성 타이밍에 맞춰 폭딜을 넣을 때 필수적인 룬." },
             { "name": "여명+", "grade": "전설", "type": "방어구", "rank": "A", "description": "누적: 스킬을 사용할 때마다 10초 동안 공격력이 3.5% 증가한다. 해당 효과는 최대 6회까지 중첩되며 지속 시간은 스택마다 개별로 가진다.", "analysis": "최대 21%의 공격력을 얻는 준수한 스택형 룬. 스킬을 자주 사용하는 빌드에서 꾸준한 성능을 보여준다." },
             { "name": "황혼", "grade": "전설", "type": "방어구", "rank": "A", "description": "누적: 공격이 적중할 때마다 8초 동안 적에게 주는 피해가 1.4% 증가한다. 해당 효과는 최대 16회까지 중첩되며 지속 시간은 스택마다 개별로 가진다.", "analysis": "최대 22.4%의 주는 피해를 얻는 스택형 룬. 다단히트 스킬과 시너지가 좋지만, 꾸준히 공격해야 스택을 유지할 수 있다." },
             { "name": "바위 감시자", "grade": "전설", "type": "방어구", "rank": "A+", "description": "축적: 강타 7회 적중 시, 6초 동안 공격력이 22% 증가한다.", "analysis": "강타 7회라는 조건이 다소 까다롭지만, 일단 발동하면 6초간 강력한 공격력 버프를 제공한다. 특정 강타 위주 빌드에서 순간적인 폭딜을 위해 채용된다." },
@@ -163,7 +165,8 @@
             { "name": "마지막 자비", "grade": "전설", "type": "무기", "rank": "S", "description": "공격력이 20% 증가한다. 남은 체력이 50% 이하인 적을 공격했을 경우, 10초 동안 공격력이 추가로 20% 증가한다.", "analysis": "체력이 50% 이하인 적에게 공격력이 총 40%나 증가하는 '마무리' 전문 룬. 보스전 막바지에 폭딜을 넣어 클리어 타임을 단축시키는 데 매우 효과적이다." },
             { "name": "끝없는 순환", "grade": "전설", "type": "무기", "rank": "C", "description": "축적: 아군을 20회 회복시킨 이후, 다음 공격 적중 시 대상의 위치에 마법진을 펼쳐 9m 범위 내의 적들에게 0.5초마다 (공격력×21%)의 암흑 피해를 4.5초 동안 입힌다. 축적: 적을 20회 공격한 이후, 다음 아군 회복 시 대상의 위치에 마법진을 펼쳐 9m 범위 내의 아군의 체력을 0.5초마다 (공격력×0.5%)씩 4.5초 동안 회복한다. 축적 효과는 각각 0.5초에 한 번만 획득 할 수 있다.", "analysis": "힐과 딜을 해야만 각각의 효과가 발동하는, 조건이 너무 복잡하고 비효율적인 룬. 하이브리드 서포터를 위한 설계지만, 실전성은 거의 없다." },
             { "name": "종언+", "grade": "전설", "type": "무기", "rank": "B", "description": "누적: 자신과 전투 중인 적이 처치되었을 경우, 공격력이 20초 동안 2% 증가한다. 해당 효과는 최대 10회까지 중첩되며 지속 시간은 스택마다 개별로 가진다. 공격력이 24% 증가한다.", "analysis": "기본 공격력 24%에 더해, 적 처치 시 공격력이 추가로 증가한다. 쫄몹을 잡으며 스택을 쌓고 보스에게 돌입하는 던전에서 매우 강력한 성능을 보인다." },
-            { "name": "영웅", "grade": "전설", "type": "무기", "rank": "S", "description": "공격력, 연타 피해, 강타 피해, 콤보 피해, 스킬 피해, 치명타 피해, 멀티 히트 피해가 각각 4.3% 증가한다.", "analysis": "모든 종류의 피해량을 골고루 4.3%씩, 총 30.1%나 올려주는, 곱연산 효율이 매우 뛰어난 룬. 어떤 빌드에 넣어도 밥값을 하며, 특히 여러 종류의 피해를 동시에 입히는 직업군에게 최고의 효율을 보인다." }
+            { "name": "영웅", "grade": "전설", "type": "무기", "rank": "S", "description": "공격력, 연타 피해, 강타 피해, 콤보 피해, 스킬 피해, 치명타 피해, 멀티 히트 피해가 각각 4.3% 증가한다.", "analysis": "모든 종류의 피해량을 골고루 4.3%씩, 총 30.1%나 올려주는, 곱연산 효율이 매우 뛰어난 룬. 어떤 빌드에 넣어도 밥값을 하며, 특히 여러 종류의 피해를 동시에 입히는 직업군에게 최고의 효율을 보인다." },
+            { "name": "지휘관", "grade": "전설", "type": "무기", "rank": "B", "description": "강타, 연타, 무방비, 치명타, 추가타 공격 시, 8초 동안 공격력이 4.5% 증가하며, 해당 효과는 최대 5회까지 중첩된다. 각 공격력 증가 효과는 별도의 지속 시간을 가진다.", "analysis": "최대 스택 시 공격력 22.5%는 준수하지만, 상위 호환 룬들이 많아지면서 B급으로 평가가 내려왔다." }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
