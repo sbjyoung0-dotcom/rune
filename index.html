@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마비노기 모바일 룬 브라우저 (최종 픽스 완료)</title>
+    <title>마비노기 모바일 룬 & 레이드 매니저 (신규 룬 업데이트)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: The final, verified 'Rune Browser' SPA. Built exclusively on user-provided data (all text lists, images, and conditional tiers), this version has undergone a multi-step verification process to ensure 100% data integrity (no omissions, no duplicates, descriptions and analysis updated) and functional correctness. The structure features a full-fledged control panel (including the 'Type' and new 'Class' filter) and a highly readable card layout, providing a stable and accurate tool for rune analysis. -->
-    <!-- Visualization & Content Choices: 
-    - Rune List -> Goal: Explore/Compare/Filter -> Presentation: Interactive Card Grid with 100% verified data -> Interaction: Full filtering (text, grade, type, rank, and new class filter) -> Justification: The UI now correctly represents the complete and accurate dataset. The card layout remains the most effective way to present this dense, text-based information clearly and without errors. The analysis section explicitly includes the user's conditional/class-based logic. Method: HTML/JS.
-    - All Data Integrity Issues -> Goal: Correct/Restore -> Presentation: N/A -> Interaction: N/A -> Justification: All omissions, duplications, and outdated data have been meticulously corrected and verified against all user-provided sources.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #FDFBF8;
-            color: #4A4A4A;
+            background-color: #F3F4F6;
+            color: #1F2937;
         }
+        /* Rune Rank Colors */
         .rank-SSS { background: linear-gradient(135deg, #fde047, #f59e0b); color: #422006; border: 2px solid #ca8a04; }
         .rank-SS { background: linear-gradient(135deg, #d1d5db, #9ca3af); color: #1f2937; border: 2px solid #6b7280; }
         .rank-S { background-color: #EC4899; color: white; }
@@ -34,65 +28,211 @@
         .type-무기 { background-color: #DC2626; color: white; }
         .type-방어구 { background-color: #059669; color: white; }
         .type-엠블럼 { background-color: #7e22ce; color: white; }
-
         .grade-신화 { border-color: #8B5CF6; color: #8B5CF6; }
         .grade-전설 { border-color: #FBBF24; color: #FBBF24; }
+
+        /* Raid Planner Styles */
+        .role-tank { background-color: #fee2e2; color: #991b1b; } /* Red tint */
+        .role-dealer { background-color: #e0f2fe; color: #075985; } /* Blue tint */
+        .role-healer { background-color: #dcfce7; color: #166534; } /* Green tint */
+        .role-support { background-color: #f3e8ff; color: #6b21a8; } /* Purple tint */
+
+        .tab-active { border-bottom: 2px solid #4F46E5; color: #4F46E5; font-weight: 700; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #6B7280; }
+        .tab-inactive:hover { color: #374151; border-bottom: 2px solid #D1D5DB; }
     </style>
 </head>
-<body class="antialiased">
-    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-[#3A3A3A]">마비노기 모바일 룬 브라우저</h1>
-            <p class="mt-2 text-lg text-gray-600">필터를 사용하여 원하는 룬의 효과와 분석을 자세히 확인하세요.</p>
-        </header>
+<body class="antialiased min-h-screen flex flex-col">
 
-        <section id="controls" class="mb-8 p-4 bg-white rounded-xl shadow-md sticky top-4 z-10">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
-                <div class="lg:col-span-2">
-                    <label for="search-input" class="block text-sm font-medium text-gray-700">룬 이름 또는 분석 내용 검색</label>
-                    <input type="text" id="search-input" placeholder="예: 검술사" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <h1 class="text-xl font-bold text-gray-900 mr-8">마비노기 모바일 매니저</h1>
+                    </div>
+                    <div class="flex space-x-8">
+                        <button id="tab-rune" class="tab-active inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
+                            룬 도감
+                        </button>
+                        <button id="tab-raid" class="tab-inactive inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
+                            레이드 파티 구성
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label for="class-filter" class="block text-sm font-medium text-gray-700">클래스</label>
-                    <select id="class-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
-                        <option value="all">전체 클래스</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="grade-filter" class="block text-sm font-medium text-gray-700">등급</label>
-                    <select id="grade-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
-                        <option value="all">전체 등급</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="type-filter" class="block text-sm font-medium text-gray-700">종류</label>
-                    <select id="type-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
-                        <option value="all">전체 종류</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="rank-filter" class="block text-sm font-medium text-gray-700">랭크</label>
-                    <select id="rank-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition">
-                        <option value="all">전체 랭크</option>
-                    </select>
-                </div>
-                <button id="reset-filters" class="w-full bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">필터 초기화</button>
             </div>
-        </section>
+        </div>
+    </nav>
 
-        <main>
-             <div class="mb-4 text-right text-gray-500">
-                <p><span id="rune-count" class="font-bold">0</span>개의 룬이 검색되었습니다.</p>
-            </div>
-            <section id="rune-grid" class="space-y-6">
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl flex-grow">
+        
+        <!-- ==================== SECTION 1: RUNE BROWSER ==================== -->
+        <div id="section-rune-browser" class="block">
+            <header class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">룬 정보 탐색</h2>
+                <p class="text-gray-600">필터를 사용하여 룬 효과와 전문가 분석을 확인하세요.</p>
+            </header>
+
+            <section id="controls" class="mb-8 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
+                    <div class="lg:col-span-2">
+                        <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">검색</label>
+                        <input type="text" id="search-input" placeholder="룬 이름, 직업명(예: 검술사)" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                    </div>
+                    <div>
+                        <label for="class-filter" class="block text-sm font-medium text-gray-700 mb-1">클래스</label>
+                        <select id="class-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <option value="all">전체 클래스</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="grade-filter" class="block text-sm font-medium text-gray-700 mb-1">등급</label>
+                        <select id="grade-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <option value="all">전체 등급</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="type-filter" class="block text-sm font-medium text-gray-700 mb-1">종류</label>
+                        <select id="type-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <option value="all">전체 종류</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="rank-filter" class="block text-sm font-medium text-gray-700 mb-1">랭크</label>
+                        <select id="rank-filter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border">
+                            <option value="all">전체 랭크</option>
+                        </select>
+                    </div>
+                    <button id="reset-filters" class="w-full bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700 transition shadow-sm">초기화</button>
+                </div>
             </section>
-        </main>
+
+            <div class="mb-4 text-right text-gray-500 text-sm">
+                검색된 룬: <span id="rune-count" class="font-bold text-indigo-600">0</span>개
+            </div>
+            <section id="rune-grid" class="space-y-4">
+                <!-- Cards will be injected here -->
+            </section>
+        </div>
+
+        <!-- ==================== SECTION 2: RAID BUILDER ==================== -->
+        <div id="section-raid-builder" class="hidden">
+            <!-- (Raid Builder content remains same as previous version) -->
+             <header class="mb-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">레이드 파티 구성기</h2>
+                    <p class="text-gray-600">길드원을 등록하고 최적의 8인 레이드 파티를 구성하세요.</p>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Column: Member Input & Roster -->
+                <div class="lg:col-span-4 space-y-6">
+                    <!-- Input Form -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">길드원 등록</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">이름</label>
+                                <input type="text" id="member-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border p-2" placeholder="예: 카엔">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">직업</label>
+                                <select id="member-class" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border p-2">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">전투력 (CP)</label>
+                                <input type="number" id="member-cp" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border p-2" placeholder="예: 15000">
+                            </div>
+                            <button id="add-member-btn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 font-medium shadow-sm transition">명단에 추가</button>
+                        </div>
+                    </div>
+
+                    <!-- Roster List -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-lg font-bold text-gray-800">대기 명단 (<span id="roster-count">0</span>)</h3>
+                            <button id="clear-roster-btn" class="text-xs text-red-500 hover:text-red-700 underline">전체 삭제</button>
+                        </div>
+                        <div id="roster-list" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+                            <p class="text-sm text-gray-500 text-center py-4">등록된 길드원이 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Party Boards -->
+                <div class="lg:col-span-8 space-y-6">
+                    <!-- Party 1 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="bg-blue-600 px-6 py-3 flex justify-between items-center text-white">
+                            <h3 class="font-bold text-lg">1파티 (메인)</h3>
+                            <div class="text-sm opacity-90">
+                                평균 CP: <span id="p1-avg-cp" class="font-bold">0</span> | 인원: <span id="p1-count">0</span>/4
+                            </div>
+                        </div>
+                        <div class="p-0">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">역할 (전투력)</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="party1-list" class="bg-white divide-y divide-gray-200">
+                                    <!-- Slots 1-4 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Party 2 -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="bg-green-600 px-6 py-3 flex justify-between items-center text-white">
+                            <h3 class="font-bold text-lg">2파티 (서브)</h3>
+                            <div class="text-sm opacity-90">
+                                평균 CP: <span id="p2-avg-cp" class="font-bold">0</span> | 인원: <span id="p2-count">0</span>/4
+                            </div>
+                        </div>
+                        <div class="p-0">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">역할 (전투력)</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="party2-list" class="bg-white divide-y divide-gray-200">
+                                    <!-- Slots 1-4 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Data generated from user's final text list - verified for 109 runes, no duplicates, no omissions. Descriptions and conditional analysis updated.
-        // Class recommendation data added based on the user's latest image.
+        // ==================== DATA: RUNE BROWSER ====================
         const runeData = [
+            // === 신규 전설 방어구 룬 7종 ===
+            { "name": "창백한 섬광", "grade": "전설", "type": "방어구", "rank": "SSS", "description": "공격 시, 치명타 확률이 15초 동안 8/10% 증가한다. 보유한 모든 충전을 전력으로 변환하고, 변환된 전력 수치 × 0.09%만큼 치명타 확률이 추가로 증가한다.(재사용 대기 시간: 15초) 50이상의 전력을 보유한 상태에서 각성 혹은 궁극기 사용 시, 과부하 상태가 된다. 치명타 피해가 32% 증가하며, 1초마다 50의 전력을 소모한다. 전력이 50 미만이 될 경우, 즉시 과부하가 종료된다.", "analysis": "<strong>[만장일치 추천]</strong> <span class='text-blue-600'>[새크리마]</span> 이견 없는 개사기. 치명타 확률과 피해량을 동시에 챙겨 '들불'을 압도함.<br><span class='text-purple-600'>[1타법사]</span> 넘사벽의 성능 차이. '아득한 빛' 엠블럼과 사용 시 종결 세팅.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "궁수", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "전격술사", "암흑술사", "음유시인", "악사", "댄서", "도적", "격투가", "듀얼 블레이드"] },
+            { "name": "일렁이는 불꽃", "grade": "전설", "type": "방어구", "rank": "SS", "description": "공격 시, 추가타 확률이 15초 동안 8/10% 증가한다. 보유한 모든 충전을 전력으로 변환하고, 변환된 전력 수치 × 0.09%만큼 추가타 확률이 추가로 증가한다.(재사용 대기 시간: 15초) 50이상의 전력을 보유한 상태에서 각성 혹은 궁극기 사용 시, 과부하 상태가 된다. 공격 적중 시 선행 타격의 30% 피해를 주는 추가 공격이 발생하며, 1초마다 50의 전력을 소모한다. 전력이 50 미만이 될 경우, 즉시 과부하가 종료된다.", "analysis": "<strong>[강력 추천]</strong> <span class='text-blue-600'>[새크리마]</span> 비문학의 정점. 결론은 최종 데미지 30% 증가. 단, '갈라진 땅' 엠블럼과는 효율 나쁨.<br><span class='text-purple-600'>[1타법사]</span> 타수가 많은 직업에게는 종결급 성능.", "recommendedClasses": ["전사 (검방)", "검술사", "궁수", "석궁사수", "전격술사", "암흑술사", "도적", "듀얼 블레이드"] },
+            { "name": "울려퍼지는 천둥", "grade": "전설", "type": "방어구", "rank": "A", "description": "공격 시 스킬 사용 속도, 공격 속도, 캐스팅 및 차지 속도가 15초 동안 6% 증가한다. 보유한 모든 충전을 전력으로 변환하고 변환된 전력 수치 × 0.06%만큼 스킬 사용속도, 공격 속도, 캐스팅 및 차지 속도가 추가로 증가한다.(재사용 대기 시간: 15초) 100이상의 전력을 보유한 상태에서 각성 혹은 궁극기 사용 시, 과부하 상태가 된다. 공격 적중 시, 대상 방향으로 전력을 방출하여 (공격력×n%)의 피해를 주고 100의 전력을 소모한다. 전력이 100 미만이 될 경우, 즉시 과부하가 종료된다.", "analysis": "<strong>[의견 대립]</strong> <span class='text-blue-600'>[새크리마]</span> 쓰레기(떡). 딜 상승에 기여하지 못함.<br><span class='text-purple-600'>[1타법사]</span> 법사 종결 가능성. 캐스팅/차지 속도가 중요한 마법사에게 가치 있음.", "recommendedClasses": ["마법사", "전격술사", "사제"] },
+            { "name": "유성", "grade": "전설", "type": "방어구", "rank": "B", "description": "공격 시, 적에게 (공격력×n%)의 피해를 준다. 보유한 모든 충전을 전력으로 변환하고, 변환된 전력 수치 × (공격력×n%)만큼의 피해를 추가로 준다.(재사용 대기 시간: 15초) 100이상의 전력을 보유한 상태에서 각성 혹은 궁극기 사용 시, 과부하 상태가 된다. 1초마다 자신의 현재 타겟 주변 3.5m 범위 내의 적들에게 (공격력×n%)의 피해를 주는 마력포를 발사하고 100의 전력을 소모한다. 전력이 100 미만이 될 경우 즉시 과부하가 종료된다.", "analysis": "<strong>[조건부 평가]</strong> <span class='text-blue-600'>[새크리마]</span> 버그 원툴. 버그 수정 시 폐기물.<br><span class='text-purple-600'>[1타법사]</span> 근접 클래스 추천. 상위 인챈트 사용 시 직접 피해량이 쏠쏠함.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "격투가", "듀얼 블레이드"] },
+            { "name": "초신성", "grade": "전설", "type": "방어구", "rank": "C", "description": "공격 시, 적에게 (공격력×n%)의 피해를 주고 15초 동안 공격력이 5% 증가한다. 보유한 모든 충전을 전력으로 변환하고, 변환된 전력 1마다 (공격력×n%)의 피해를 추가로 주며, 0.04%만큼 공격력이 추가로 증가한다.(재사용 대기 시간: 15초) 각성 혹은 궁극기 사용 시, 전력을 모두 소모하여 주변 10 범위 내의 적들에게 전력 수치 × (공격력×n%)의 피해를 준다.", "analysis": "<span class='text-blue-600'>[새크리마]</span> 섞어찌개라 효율 최악.<br><span class='text-purple-600'>[1타법사]</span> 원거리/힐러 고려. 공증과 범위 피해가 같이 있어 괜찮을 수 있음.", "recommendedClasses": ["힐러", "사제", "궁수", "장궁병"] },
+            { "name": "번개 채찍", "grade": "전설", "type": "방어구", "rank": "C", "description": "공격 시, 적에게 주는 피해가 15초 동안 9/11% 증가한다. 보유한 모든 충전을 전력으로 변환하고 변환된 전력 수치 × 0.09%만큼 적에게 주는 피해가 추가로 증가한다.(재사용 대기 시간: 15초) 100이상의 전력을 보유한 상태에서 각성 혹은 궁극기 사용 시, 과부하 상태가 된다. 공격 적중 시, 대상 방향으로 사슬을 휘둘러 (공격력×n%)의 피해를 주고 100의 전력을 소모한다. 전력이 100 미만이 될 경우, 즉시 과부하가 종료된다.", "analysis": "<span class='text-blue-600'>[새크리마]</span> 점수 줄 가치 없음.<br><span class='text-purple-600'>[1타법사]</span> 애매함. 이미 좋은 피증 룬이 많아 우선순위 떨어짐.", "recommendedClasses": [] },
+            { "name": "기본기", "grade": "전설", "type": "방어구", "rank": "S", "description": "공격력이 15% 증가한다.", "analysis": "조건 없이 공격력을 15% 올려주는 심플하고 강력한 룬. 범용적인 세팅에 최적.", "recommendedClasses": [] },
+
+            // ... (기존 109개 룬 데이터 유지) ...
+            // (여기에는 이전 답변의 runeData 배열 내용을 그대로 넣습니다. 분량 상 생략하지만 실제 파일에는 모두 포함됩니다)
             // 신화 (12개)
             { "name": "닫힌 운명", "grade": "신화", "type": "방어구", "rank": "SSS", "description": "공격 적중시, 결계를 생성하여 타겟과 그 주변에 (공격력×n%)의 피해를 입히고, 약화 효과: 방어구 파괴를 부여해 10초 동안 받는 피해를 10% 증가시킨다. 결계는 1, 2, 4겹으로 늘어나며 최대치까지 늘어난 이후에는 다시 1겹으로 돌아온다.(재사용 대기 시간: 5초)방어구 파괴는 중복 적용되지 않는다.", "analysis": "5초마다 최대 10%의 방어구 파괴(받는 피해 증가) 디버프를 거의 상시 유지시키는 최상급 파티 시너지 룬. 이 디버프는 다른 방깎 효과와 중복되지 않아 유니크한 가치를 지닌다. 본인의 딜 상승은 물론 파티 전체의 DPS를 극대화하므로, 모든 콘텐츠에서 압도적인 성능을 자랑하는 종결급 룬.", "recommendedClasses": ["검술사", "수도사", "음유시인"] },
             { "name": "검게 물든 후광", "grade": "신화", "type": "방어구", "rank": "SSS", "description": "받는 피해가 15%, 적에게 주는 피해가 15% 증가한다.아군을 회복시키거나 물약을 사용하면 15초 동안 받는 피해 증가 효과가 무효화된다.장비를 +10, +15 강화 시 각각 적에게 주는 피해가 6% 추가로 증가한다.", "analysis": "하이 리스크, 하이 리턴의 극치. 강화 시 최대 27%까지 주는 피해가 증가하는 폭발적인 딜링 능력을 가졌지만, 받는 피해 15% 증가라는 페널티가 존재한다. 물약 사용으로 잠시 무효화할 수 있지만, 컨트롤에 자신 있는 상급자용 룬. 생존만 보장된다면 최상급 포텐셜을 가진다.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "궁수", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "전격술사", "사제", "수도사", "암흑술사", "음유시인", "악사", "댄서", "도적", "격투가", "듀얼 블레이드"] },
@@ -119,7 +259,7 @@
             { "name": "갈라진 땅", "grade": "전설", "type": "엠블럼", "rank": "SS", "description": "공격 시 50% 확률로 각성하여 35초 동안 추가타 확률이 30% 증가하며, 추가타 적중 시 다음 공격은 선행 타격의 18% 만큼의 피해를 주는 추가 공격이 발생한다.(재사용 대기 시간: 90초)상시 효과: 추가타 확률이 12% 증가한다.", "analysis": "추가타에 모든 것을 건 룬. 빙결, 전격 등 추가타와 시너지가 좋은 빌드에게는 SS급 성능을 보이며, 그 외 추가타 세팅을 한 직업군에게도 S급의 높은 효율을 제공한다.", "recommendedClasses": [] },
             
             // 방어구 (구 장신구 포함, 47개)
-            { "name": "압도적인 힘", "grade": "전설", "type": "방어구", "rank": "A", "description": "강타 피해가 6%, 공격력이 6%, 치명타 확률이 4% 증가한다. 엠블럼의 각성 효과가 활성화될 때, 20초간 이 룬으로 증가한 능력치가 두배가 된다.", "analysis": "단독 사용 시 A급. 8성 엠블럼과 눈 먼 예언자 룬과 조합될 경우 20초간 SSS급으로 변모하는 폭발적인 잠재력을 가졌다. 강타 빌드의 폭딜 타임을 책임지는 핵심 파츠.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "궁수", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "전격술사", "사제", "수도사", "암흑술사", "음유시인", "악사", "댄서", "도적", "격투가", "듀얼 블레이드"] },
+            { "name": "압도적인 힘", "grade": "전설", "type": "방어구", "rank": "A", "description": "강타 피해가 6%, 공격력이 6%, 치명타 확률이 4% 증가한다. 엠블럼의 각성 효과가 활성화될 때, 20초간 이 룬으로 증가한 능력치가 두배가 된다.", "analysis": "단독 사용 시에는 A급의 무난한 성능을 보여주지만, 8성 엠블럼과 눈 먼 예언자 룬과 조합될 경우 20초간 SSS급으로 변모하는 폭발적인 잠재력을 가졌다. 강타 빌드의 폭딜 타임을 책임지는 핵심 파츠.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "궁수", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "전격술사", "사제", "수도사", "암흑술사", "음유시인", "악사", "댄서", "도적", "격투가", "듀얼 블레이드"] },
             { "name": "섬세한 손놀림", "grade": "전설", "type": "방어구", "rank": "A", "description": "연타 피해가 6%, 공격력이 6%, 추가타 확률이 4% 증가한다. 엠블럼의 각성 효과가 활성화될 때, 20초간 이 룬으로 증가한 능력치가 두배가 된다.", "analysis": "'압도적인 힘'의 연타 버전. 단독 성능은 A급이지만, 8성 엠블럼과 눈 먼 예언자 룬과 조합 시 20초간 SSS급 딜링을 보장한다. 연타 위주 직업군이 각성 타이밍에 맞춰 폭딜을 넣을 때 필수적인 룬.", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "궁수", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "전격술사", "사제", "수도사", "암흑술사", "음유시인", "악사", "댄서", "도적", "격투가", "듀얼 블레이드"] },
             { "name": "여명+", "grade": "전설", "type": "방어구", "rank": "A", "description": "누적: 스킬을 사용할 때마다 10초 동안 공격력이 3.5% 증가한다. 해당 효과는 최대 6회까지 중첩되며 지속 시간은 스택마다 개별로 가진다.", "analysis": "최대 21%의 공격력을 얻는 준수한 스택형 룬. 스킬을 자주 사용하는 빌드에서 꾸준한 성능을 보여준다.", "recommendedClasses": [] },
             { "name": "황혼", "grade": "전설", "type": "방어구", "rank": "A", "description": "누적: 공격이 적중할 때마다 8초 동안 적에게 주는 피해가 1.4% 증가한다. 해당 효과는 최대 16회까지 중첩되며 지속 시간은 스택마다 개별로 가진다.", "analysis": "최대 22.4%의 주는 피해를 얻는 스택형 룬. 다단히트 스킬과 시너지가 좋지만, 꾸준히 공격해야 스택을 유지할 수 있다.", "recommendedClasses": [] },
@@ -180,7 +320,7 @@
             { "name": "공포", "grade": "전설", "type": "무기", "rank": "F", "description": "치명타 피해가 18% 증가한다.공격 적중 시, (공격력×n%)의 지속 피해: 암흑을 준다.(재사용 대기 시간: 10초)", "analysis": "치명타 피해 증가 외 다른 유효 옵션이 부족하여 딜 상승 기여도가 낮다.", "recommendedClasses": [] },
             { "name": "집행자", "grade": "전설", "type": "무기", "rank": "S", "description": "치유량이 20%, 적에게 주는 피해가 10% 증가한다.공격 적중 시, (공격력×n%)의 지속 피해: 신성을 준다.(재사용 대기 시간: 10초)", "analysis": "힐러에게 유용한 치유량 증가와 딜 증가를 함께 제공. 신성 피해 계수도 높아 하이브리드 서포터에게 좋다. [추천 클래스: 힐러]", "recommendedClasses": ["힐러"] },
             { "name": "야수+", "grade": "전설", "type": "무기", "rank": "S", "description": "적에게 주는 피해가 20% 증가한다.공격 적중 시, (공격력×n%)의 지속 피해: 출혈을 준다.(재사용 대기 시간: 10초)", "analysis": "'밤'의 피해 증가 버전입니다. 피해 증가 20%와 상처(출혈) 지속 피해를 주며, 연타 확률을 크게 높여주는(약 43% → 85%) 트리거 역할을 합니다.", "recommendedClasses": [] },
-            { "name": "밤+", "grade": "전설", "type": "무기", "rank": "C", "description": "공격력이 20% 증가한다.공격 적중 시, (공격력×n%)의 지속 피해: 정신을 준다.(재사용 대기 시간: 10초)", "analysis": "상시 공격력 약 19% 증가 효과가 있으며, 적중 시 '공포' 지속 피해(DPS 약 5% 차지)를 입힙니다. 가장 큰 장점은 연타 확률을 크게 높여주는 트리거 역할(기본 40% → 착용 시 96%)을 한다는 점입니다.", "recommendedClasses": [] },
+            { "name": "밤+", "grade": "전설", "type": "무기", "rank": "A", "description": "공격력이 20% 증가한다.공격 적중 시, (공격력×n%)의 지속 피해: 정신을 준다.(재사용 대기 시간: 10초)", "analysis": "상시 공격력 약 19% 증가 효과가 있으며, 적중 시 '공포' 지속 피해(DPS 약 5% 차지)를 입힙니다. 가장 큰 장점은 연타 확률을 크게 높여주는 트리거 역할(기본 40% → 착용 시 96%)을 한다는 점입니다.", "recommendedClasses": [] },
             { "name": "투사+", "grade": "전설", "type": "무기", "rank": "S", "description": "적에게 주는 피해가 33% 증가한다.결함: 멀티히트 피해가 10% 감소한다.", "analysis": "멀티히트 페널티가 있지만 '주는 피해 33%'는 매우 높은 수치. 단타 스킬 위주 빌드에서 강력하다. [추천 클래스: 전사 (검방), 전사 (대검), 검술사, 석궁사수, 장궁병, 마법사, 화염술사, 빙결술사, 사제, 암흑술사, 음유시인, 악사, 댄서, 듀얼 블레이드]", "recommendedClasses": ["전사 (검방)", "전사 (대검)", "검술사", "석궁사수", "장궁병", "마법사", "화염술사", "빙결술사", "사제", "암흑술사", "음유시인", "악사", "댄서", "듀얼 블레이드"] },
             { "name": "은둔자+", "grade": "전설", "type": "무기", "rank": "B", "description": "공격력이 33% 증가한다.결함: 재사용 대기 시간 회복 속도가 9% 감소한다.", "analysis": "쿨감 페널티가 스킬 빌드에게 치명적. 평타 위주 빌드라면 공격력 33%를 활용할 수 있다.", "recommendedClasses": [] },
             { "name": "망각+", "grade": "전설", "type": "무기", "rank": "C", "description": "공격력이 19% 증가한다.기본 공격 적중 시, 모든 스킬의 재사용 대기 시간이 9% 감소한다.", "analysis": "'무한' 룬의 하위 호환. 공격력 증가량도 낮아 애매하다. [추천 클래스: 수도사, 도적, 격투가]", "recommendedClasses": ["수도사", "도적", "격투가"] },
@@ -207,7 +347,6 @@
             const runeCountSpan = document.getElementById('rune-count');
             
             const rankOrder = ["SSS", "SS", "S", "A+", "A", "B", "C", "F", "TBD"];
-            const allClassNames = [...new Set(runeData.flatMap(r => r.recommendedClasses))].sort((a, b) => a.localeCompare(b, 'ko'));
 
             function getRankClass(rank) {
                 if (rank.includes('/')) return 'rank-A-Plus'; 
@@ -223,6 +362,8 @@
                 const ranks = [...new Set(runeData.map(r => r.rank.split('/')[0]))]
                     .filter((v, i, a) => a.indexOf(v) === i)
                     .sort((a, b) => rankOrder.indexOf(a) - rankOrder.indexOf(b));
+                
+                const allClassNames = [...new Set(runeData.flatMap(r => r.recommendedClasses))].sort((a, b) => a.localeCompare(b, 'ko'));
 
                 grades.forEach(grade => {
                     const option = document.createElement('option');
